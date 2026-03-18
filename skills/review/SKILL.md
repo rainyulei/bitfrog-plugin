@@ -74,22 +74,9 @@ The subagent reviews for:
 
 #### Reviewer Dispatch Prompt Template
 
-When dispatching the code-reviewer subagent, provide structured context:
+When dispatching the code-reviewer subagent, use the template in `skills/review/reviewer-prompt.md`. It includes: the 三省 review framework, output format, severity definitions, verdict options, and calibration notes.
 
-```
-You are reviewing changes for: [brief description of what was built]
-
-Spec/Plan document: [path]
-Changes: [git diff or commit range]
-
-Review using the 三省 framework:
-1. 自省 (Plan Compliance): Does the implementation match the spec? Flag missing tasks, extra changes, misinterpretations.
-2. 互省 (Code Quality): Readability, abstraction, debuggability, error handling, naming, test quality.
-3. 终省 (Systemic Impact): Coupling, missing edge cases, performance, security.
-
-For each finding: file:line-range, severity (Critical/Important/Suggestion), issue, suggested fix.
-End with verdict: APPROVED / APPROVED_WITH_SUGGESTIONS / CHANGES_REQUESTED.
-```
+Read the template file and fill in the placeholders (description, spec path, git diff range).
 
 ---
 

@@ -115,6 +115,8 @@ The first approach discovers bugs because the test is independent of the code. T
 | Must mock everything | Code is too coupled | Use dependency injection, reduce coupling |
 | Test setup is huge | Too many dependencies | Extract helpers, or simplify the design |
 
+When adding mocks or test utilities, read `skills/execute/testing-anti-patterns.md` to avoid common traps: testing mock behavior instead of real behavior, test-only production methods, mocking without understanding, testing implementation instead of behavior, and incomplete mocks hiding real bugs.
+
 ### Self-Check Questions — 反求诸己
 
 When tempted to skip TDD, ask yourself:
@@ -197,35 +199,9 @@ When a subagent returns, it should report one of:
 
 ### Implementer Prompt Template
 
-When dispatching a subagent for a task, use this structure:
+When dispatching a subagent, use the template in `skills/execute/implementer-prompt.md`. It includes: context, task scope, file boundaries, patterns to follow, definition of done, TDD discipline, self-review checklist, and status reporting protocol.
 
-```
-You are implementing Task N of the [feature] plan.
-
-## Context
-[What we're building. What has been done so far. Which tasks are complete.]
-
-## Your Task
-[Copy the task description from the plan, including all steps]
-
-## Files
-- Create: [exact paths]
-- Modify: [exact paths with line ranges if known]
-- Do NOT touch: [files that are out of scope]
-
-## Patterns to Follow
-[Naming conventions, directory structure, import style from the codebase]
-
-## Definition of Done
-Run: [exact test command]
-Expected: [exact output — e.g., "Tests: 5 passed, 5 total"]
-
-## If You Get Stuck
-- If blocked by missing context → report NEEDS_CONTEXT with what you need
-- If blocked by a dependency → report BLOCKED with what is missing
-- If something feels wrong → report DONE_WITH_CONCERNS with your concern
-- Do NOT improvise around blockers. Do NOT modify files outside your scope.
-```
+Read the template file and fill in the placeholders for each dispatch.
 
 ### Handling Subagent Returns
 

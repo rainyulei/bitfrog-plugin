@@ -69,6 +69,20 @@ Follow this checklist in order. Do not skip steps.
 
 ---
 
+## Working in Existing Codebases — 入乡随俗 Rù Xiāng Suí Sú (When in Rome)
+
+When brainstorming within an existing project, 格物 starts with what already exists:
+
+1. **Explore the current structure first** — read source files, directory layout, existing patterns, before proposing anything new.
+2. **Follow existing patterns** — if the codebase uses factories, use factories. If it uses flat modules, use flat modules. Consistency beats "better" patterns.
+3. **Do not propose unrelated refactoring** — stay focused on the current goal. If existing code has problems that affect your work, include targeted improvements. Otherwise, leave it.
+4. **Respect existing naming conventions** — check git history for how new files/functions are typically named in this project.
+5. **Identify the blast radius** — before proposing changes, understand what depends on the code you want to modify.
+
+The principle: your design should feel like it belongs in this codebase, not like it was dropped in from a different project.
+
+---
+
 ## Embedded Tools
 
 ### Spec Document Writer
@@ -90,24 +104,9 @@ The spec must include:
 
 After writing the spec, dispatch a review subagent to examine it. 格物致知 applies to our own output — investigate the spec before treating it as truth.
 
-**Dispatch the code-reviewer agent with this context:**
+**Dispatch the code-reviewer agent using the template in `skills/brainstorm/spec-reviewer-prompt.md`.** It includes: 5 review criteria (completeness, consistency, ambiguity, YAGNI, implementability), output format, verdict options, and calibration notes.
 
-```
-You are reviewing a design specification, not code.
-
-Spec document: [path or full content]
-Original user request: [brief summary of what the user asked for]
-
-Review for:
-1. Completeness — Are there gaps? Missing error handling? Undefined behavior?
-2. Internal consistency — Do the sections contradict each other?
-3. Ambiguity — Would two different developers interpret any section differently?
-4. YAGNI — Are there features included that don't serve the core problem?
-5. Implementability — Can this be turned into a concrete plan without guessing?
-
-For each finding: section, severity (Critical/Important/Suggestion), issue, suggested fix.
-End with verdict: APPROVED / APPROVED_WITH_SUGGESTIONS / ISSUES_FOUND.
-```
+Read the template file and fill in the placeholders (spec path, user request summary).
 
 **Loop rules:**
 1. If issues found → fix them in the spec, re-dispatch reviewer

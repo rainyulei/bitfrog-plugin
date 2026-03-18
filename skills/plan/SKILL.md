@@ -69,7 +69,9 @@ Modification order: [sequence]
 
 ## Phase 2 — 致知 Zhi Zhi (Task Decomposition)
 
-With the terrain mapped and confirmed, decompose the work:
+With the terrain mapped and confirmed, decompose the work.
+
+**Calibration: Assume the executor has zero context about this codebase.** Write the plan as if the person implementing it knows the language and tools well, but has never seen this project. Every task should be self-contained: exact file paths, complete code snippets (not pseudocode), precise commands with expected output. If an executor has to guess, the plan is incomplete.
 
 ### 1. Bite-Sized Tasks
 
