@@ -112,25 +112,74 @@ docs/plans/YYYY-MM-DD-<topic>-plan.md
 
 Create the `docs/plans/` directory if it does not exist.
 
+### 6. Review the Plan — 格物不止于设计
+
+格物致知 does not end when the spec is written. The plan itself is an artifact that deserves investigation.
+
+After saving the plan, dispatch a review subagent:
+
+**Dispatch the code-reviewer agent with:**
+
+```
+You are reviewing an implementation plan, not code.
+
+Plan document: [path]
+Spec document: [path]
+
+Review for:
+1. Spec alignment — Does every spec requirement have a corresponding task?
+2. Task completeness — Does each task have clear files, code, commands, and expected output?
+3. Dependency correctness — Are sequential/parallel markings accurate?
+4. TDD coverage — Does every task include a test-first step?
+5. Gap detection — Are there implicit assumptions not stated as tasks?
+
+For each finding: task number, severity (Critical/Important/Suggestion), issue, suggested fix.
+End with verdict: APPROVED / APPROVED_WITH_SUGGESTIONS / ISSUES_FOUND.
+```
+
+**Loop rules:** Fix issues and re-dispatch, max 3 iterations. Then present to user for confirmation.
+
 ## 嵌入工具 — Embedded Tools: Git Worktree
 
-Before any code changes begin, create an isolated worktree to protect the main branch:
+Before any code changes begin, create an isolated worktree to protect the main branch. 格物 applied to workspace: investigate the safest place to work before working.
+
+### Directory Selection
+
+Check these locations in priority order:
+1. `.worktrees/` directory (if exists in project root)
+2. `worktrees/` directory (if exists in project root)
+3. Parent directory of the project (`../`)
+4. Ask the user if none of the above are suitable
 
 ### Setup Steps
 
-1. **Verify gitignore** — Ensure the worktree directory pattern is in `.gitignore`:
+1. **Verify gitignore** — Ensure the worktree directory pattern is ignored:
    ```bash
-   grep -q 'bitfrog-*' .gitignore || echo 'bitfrog-*' >> .gitignore
+   grep -qE '\.?worktrees/' .gitignore || echo '.worktrees/' >> .gitignore
    ```
 
-2. **Create worktree** — Branch from current HEAD:
+2. **Create worktree**:
    ```bash
-   git worktree add ../bitfrog-<feature-name> -b feature/<feature-name>
+   git worktree add <dir>/bitfrog-<feature-name> -b feature/<feature-name>
    ```
 
-3. **Run baseline tests** — Confirm the worktree starts green:
+3. **Auto-detect and run project setup**:
    ```bash
-   cd ../bitfrog-<feature-name> && npm test
+   # Detect project type and install dependencies
+   [ -f package.json ] && npm install
+   [ -f Cargo.toml ] && cargo build
+   [ -f requirements.txt ] && pip install -r requirements.txt
+   [ -f go.mod ] && go mod download
+   [ -f Gemfile ] && bundle install
+   ```
+
+4. **Run baseline tests** — Confirm the worktree starts green:
+   ```bash
+   # Use project's test command
+   [ -f package.json ] && npm test
+   [ -f Cargo.toml ] && cargo test
+   [ -f pytest.ini ] || [ -f setup.py ] && pytest
+   [ -f go.mod ] && go test ./...
    ```
 
 If baseline tests fail, stop and diagnose before proceeding. Never start implementation on a red baseline.

@@ -61,6 +61,12 @@ Follow this checklist in order. Do not skip steps.
   - For every proposed feature, ask: "Do we need this in the first version?"
   - Remove anything that is not essential to solving the core problem.
 
+- [ ] **Assess scope — 大而化之不如分而治之 (Better to divide and conquer than to oversimplify)**
+  - Before diving into detailed questions, assess: does this request describe multiple independent subsystems?
+  - If yes, help the user decompose into sub-projects first. Don't spend questions refining details of a project that needs decomposition.
+  - Each sub-project gets its own spec → plan → execute → review cycle.
+  - Brainstorm the first sub-project through the normal flow, then return for the next.
+
 ---
 
 ## Embedded Tools
@@ -82,11 +88,31 @@ The spec must include:
 
 ### Spec Reviewer — Subagent Dispatch Loop
 
-After writing the spec, dispatch a code-reviewer agent to review the spec content.
+After writing the spec, dispatch a review subagent to examine it. 格物致知 applies to our own output — investigate the spec before treating it as truth.
 
-1. Dispatch the reviewer agent with the full spec content.
-2. If the reviewer finds issues, fix them in the spec and re-dispatch.
-3. **Maximum 3 iterations.** If the spec still has issues after 3 rounds, flag the remaining concerns to the user and proceed to user review.
+**Dispatch the code-reviewer agent with this context:**
+
+```
+You are reviewing a design specification, not code.
+
+Spec document: [path or full content]
+Original user request: [brief summary of what the user asked for]
+
+Review for:
+1. Completeness — Are there gaps? Missing error handling? Undefined behavior?
+2. Internal consistency — Do the sections contradict each other?
+3. Ambiguity — Would two different developers interpret any section differently?
+4. YAGNI — Are there features included that don't serve the core problem?
+5. Implementability — Can this be turned into a concrete plan without guessing?
+
+For each finding: section, severity (Critical/Important/Suggestion), issue, suggested fix.
+End with verdict: APPROVED / APPROVED_WITH_SUGGESTIONS / ISSUES_FOUND.
+```
+
+**Loop rules:**
+1. If issues found → fix them in the spec, re-dispatch reviewer
+2. Maximum 3 iterations
+3. If still unresolved after 3 rounds, flag remaining concerns to the user
 
 ### User Review Gate
 

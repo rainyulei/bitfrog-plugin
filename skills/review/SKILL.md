@@ -30,6 +30,16 @@ Before asking anyone else, examine your own work first.
 
 If self-reflection finds gaps, fix them before moving to peer-reflection. Do not waste the reviewer's time on known issues.
 
+#### Plan Review — 格物致知 applied to plans
+
+格物 does not end at the design phase. Plans themselves need investigation:
+- Does every task have a clear, testable outcome?
+- Are dependencies correctly identified?
+- Are there gaps — things the plan assumes but does not state?
+- Could any "sequential" tasks actually run in parallel, or vice versa?
+
+If the plan has issues, fix them before executing. A flawed plan produces flawed code — no amount of TDD discipline compensates for building the wrong thing.
+
 ---
 
 ### 二省 — 互省 Hu Sheng (Peer-Reflection): Code Quality
@@ -57,6 +67,25 @@ The subagent reviews for:
 | **Important**| Should fix before completing the task.    |
 | **Suggestion**| Note for future improvement. Don't block.|
 
+#### Reviewer Dispatch Prompt Template
+
+When dispatching the code-reviewer subagent, provide structured context:
+
+```
+You are reviewing changes for: [brief description of what was built]
+
+Spec/Plan document: [path]
+Changes: [git diff or commit range]
+
+Review using the 三省 framework:
+1. 自省 (Plan Compliance): Does the implementation match the spec? Flag missing tasks, extra changes, misinterpretations.
+2. 互省 (Code Quality): Readability, abstraction, debuggability, error handling, naming, test quality.
+3. 终省 (Systemic Impact): Coupling, missing edge cases, performance, security.
+
+For each finding: file:line-range, severity (Critical/Important/Suggestion), issue, suggested fix.
+End with verdict: APPROVED / APPROVED_WITH_SUGGESTIONS / CHANGES_REQUESTED.
+```
+
 ---
 
 ### 三省 — 终省 Zhong Sheng (Final-Reflection): User Value
@@ -73,17 +102,42 @@ Not "does the code work?" — but "does it deliver value?"
 
 ---
 
-## Key Rule — Receiving Feedback
+## Receiving Feedback — 三省的深层功夫
 
-> **"You're absolutely right!" is the most dangerous response.**
+> 三省 is not just about giving reflection — it is equally about RECEIVING it.
 
-When receiving review feedback:
+### The Danger of Agreement
 
-1. **Verify** the suggestion is correct before implementing it. Reviewers can be wrong.
-2. **Push back** with technical reasoning when the suggestion would make things worse.
-3. **Never implement feedback blindly** — that violates 知行合一 (Zhi Xing He Yi, unity of knowledge and action). Understanding must precede action.
+"You're absolutely right!" is the most dangerous response in a code review. Not because the reviewer is wrong, but because agreement terminates thinking. The moment you say "great point!" your mind stops examining whether the point is actually great.
 
-A good review is a dialogue, not a set of orders.
+**What genuine reception looks like (知行合一 applied to feedback):**
+
+1. **Read the feedback completely** before forming a response. Not while scrolling — after.
+2. **Verify against the codebase.** The reviewer may be wrong. They may be reading old code. They may misunderstand the context. Check.
+3. **If the suggestion is correct,** implement it with understanding, not compliance. Ask yourself: WHY is this better? What does this teach me?
+4. **If the suggestion is wrong,** push back with technical reasoning. Showing why, not just asserting disagreement.
+5. **If the suggestion is unclear,** ask for clarification FIRST. Do not guess what the reviewer meant and implement your guess.
+
+### The YAGNI Test for Review Suggestions
+
+Reviewers sometimes suggest "professional" improvements that add complexity without solving a real problem:
+- "You should add a factory pattern here" — Why? Is there more than one implementation?
+- "This should be configurable" — Who will configure it? When?
+- "Add error handling for X" — Can X actually happen in this context?
+
+格物致知 applies to review suggestions too: investigate whether the suggestion addresses a real problem before implementing it.
+
+### The Trap of Performative Agreement
+
+These responses indicate you have stopped thinking:
+- "Great catch!" (before verifying it IS a catch)
+- "Absolutely, will fix!" (before understanding what to fix)
+- "Good point, I missed that!" (before checking if you actually missed it)
+
+Replace them with genuine engagement:
+- "Let me check if that's the case..." (then actually check)
+- "I see what you mean. The tradeoff is..." (then explain the tradeoff)
+- "Can you clarify what you mean by X?" (when genuinely unclear)
 
 ---
 

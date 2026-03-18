@@ -51,6 +51,17 @@ For each task, follow the cycle strictly:
 8. 记 (ji, commit)     — Commit the working, verified change.
 ```
 
+### Why TDD — The Philosophical Root
+
+TDD is not a ritual. It is 知行合一 made concrete:
+
+- **Writing the test first** means you define what "correct" means BEFORE you can be biased by your implementation. This is 格物 (investigation) applied to code — understanding the requirement before acting on it.
+- **Watching it fail (红/red)** proves your test actually tests something. A test that passes immediately is not a test — it is a false comfort.
+- **Writing minimal code (绿/green)** is 中庸之道 — the right measure. Not too much, not too little. Only what is needed.
+- **Refactoring (理)** is reflection in action — improving what works without breaking it.
+
+If you find yourself wanting to write code first and test later, examine your understanding: do you truly know what you're building, or are you hoping to discover it by writing code? If the latter, the test IS your discovery tool — write it first.
+
 ### 3. Report Progress
 
 After every 3 completed tasks, report:
@@ -100,20 +111,49 @@ Only when the plan explicitly marks tasks as parallelizable AND all of these are
 
 4. **If conflicts are found, resolve them sequentially.** Do not re-parallelize conflict resolution.
 
+### Subagent Prompt — 阴阳互生的责任 (The Responsibility of Delegation)
+
+When you delegate to another agent, 阴阳互生 demands you give them what they need to succeed. A vague delegation is not collaboration — it is abandonment.
+
+**Every subagent prompt must include:**
+
+1. **Context** — What are we building? What has been done so far?
+2. **Specific scope** — Exactly which files to create/modify, and which to leave alone
+3. **Expected outcome** — The test command and expected output that proves success
+4. **Constraints** — Style rules, naming conventions, patterns to follow
+5. **Escalation path** — What to do if blocked (report status, don't improvise)
+
+**Subagent status protocol:**
+
+When a subagent returns, it should report one of:
+- **DONE** — All tests pass, work is complete
+- **DONE_WITH_CONCERNS** — Tests pass but something feels wrong. Explain what.
+- **BLOCKED** — Cannot proceed. Explain why and what is needed.
+- **NEEDS_CONTEXT** — Missing information required to continue.
+
+**Do not trust "DONE" blindly.** 三省吾身 (three reflections) applies to agent reports too: verify their changes against the plan, run the test suite yourself, then accept.
+
 ## Embedded Tools — Verification Before Completion (知行合一)
 
-This is the hard rule. There are no exceptions.
+知行合一 teaches: if you truly know something, that knowledge is inseparable from action. Applied to verification:
 
-Before ANY claim of "done", "complete", "finished", or "all tasks passing", you MUST:
+**What it means to truly understand "done":**
 
-1. **Identify** the verification command — test suite, type checker, linter, build command, or whatever the project uses.
-2. **Run** the command. Not from memory. Not from a previous run. Run it NOW.
-3. **Read** the output. Every line.
-4. **Confirm** success is present in the output — "All tests passed", "0 errors", exit code 0.
+- You understand that "done" is a statement about reality, not about your intentions
+- So you verify because you seek truth, not because a rule demands it
+- "I believe it works" is not knowledge — it is hope. Hope is not 知.
+- "Should be fine" / "Probably passes" / "Looks correct" — these are the language of guessing, not knowing
 
-**"I believe it works" is not verification.** Only fresh output from a real command counts as evidence.
+**What true verification looks like:**
 
-If verification fails, you are not done. Fix the issue and verify again.
+1. **Identify** the verification command (test suite, type checker, linter, build)
+2. **Run** it NOW — not from memory, not from a previous run
+3. **Read** every line of output
+4. **Confirm** the output matches your claim: "All tests passed", "0 errors", exit code 0
+
+If verification fails, you don't know it works. You only know it doesn't.
+
+**The deeper question:** If you find yourself wanting to skip verification, ask: do I truly understand why I verify? If the answer is "because the rules say so" — you have not yet internalized 知行合一. You verify because claiming without evidence is self-deception, and self-deception produces broken software.
 
 ## Problem Escalation — 辩证论治 (Bian Zheng Lun Zhi)
 
