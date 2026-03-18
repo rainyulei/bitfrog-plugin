@@ -33,7 +33,7 @@ escape_for_json() {
 }
 
 brain_escaped=$(escape_for_json "$brain_content")
-session_context="<BITFROG>\nYou have BitFrog — Chinese philosophy-driven development workflows.\n\n**Below is your brain skill. For sub-skills, use the Skill tool (e.g. bitfrog:brainstorm, bitfrog:plan, etc.):**\n\n${brain_escaped}\n</BITFROG>"
+session_context="<BITFROG>\nYou have BitFrog — Chinese philosophy-driven development workflows.\n\n**Below is your brain skill. For sub-skills, use the Skill tool (e.g. bitfrog-plugin:brainstorm, bitfrog-plugin:plan, etc.):**\n\n${brain_escaped}\n</BITFROG>"
 
 # Output JSON based on platform
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
