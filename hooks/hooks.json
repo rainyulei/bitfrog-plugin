@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "agent",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/post-compact-prompt.md\""
+            "prompt": "Read the file ${CLAUDE_PLUGIN_ROOT}/hooks/post-compact-prompt.md and follow its instructions exactly. The .bitfrog/ directory is in the current project root."
           }
         ]
       }
