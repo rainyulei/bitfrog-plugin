@@ -10,7 +10,6 @@
   "license": "MIT",
   "keywords": ["skills", "chinese-philosophy", "tdd", "debugging", "brainstorm", "bitfrog"],
   "skills": "./skills/",
-  "agents": "./agents/",
   "commands": "./commands/",
   "hooks": "./hooks/hooks.json"
 }

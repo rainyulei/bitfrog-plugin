@@ -1,5 +1,6 @@
 ---
 name: code-reviewer
+description: "Senior code reviewer using 三省 (Three Reflections) framework — plan compliance, code quality, and systemic impact"
 model: inherit
 ---
 
