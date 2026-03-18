@@ -62,6 +62,68 @@ TDD is not a ritual. It is 知行合一 made concrete:
 
 If you find yourself wanting to write code first and test later, examine your understanding: do you truly know what you're building, or are you hoping to discover it by writing code? If the latter, the test IS your discovery tool — write it first.
 
+### TDD by Example
+
+**Good — test defines behavior before implementation:**
+
+```typescript
+// RED: Write the test first
+test('rejects empty email on form submit', async () => {
+  const result = await submitForm({ email: '' });
+  expect(result.error).toBe('Email required');
+});
+
+// Verify RED: run test → FAIL: "submitForm is not defined" ✓
+
+// GREEN: Minimal implementation
+function submitForm(data: FormData) {
+  if (!data.email?.trim()) {
+    return { error: 'Email required' };
+  }
+  return { success: true };
+}
+
+// Verify GREEN: run test → PASS ✓
+```
+
+**Bad — implementation first, test retrofitted:**
+
+```typescript
+// ✗ Wrote implementation first
+function submitForm(data: FormData) {
+  if (!data.email?.trim()) return { error: 'Email required' };
+  if (!data.email.includes('@')) return { error: 'Invalid email' };
+  // ... 50 lines of validation ...
+  return { success: true };
+}
+
+// ✗ Test written after — just confirms what already exists
+test('validates email', () => {
+  expect(submitForm({ email: '' }).error).toBe('Email required');
+  // This test was shaped by the code, not the requirement
+});
+```
+
+The first approach discovers bugs because the test is independent of the code. The second just photographs existing behavior — including its bugs.
+
+### When Stuck with TDD
+
+| Problem | What it tells you | Solution |
+|---------|-------------------|----------|
+| Don't know how to test it | You don't know what it should do | Write the assertion first — the API you wish existed |
+| Test too complicated | The design is too complicated | Simplify the interface, then the test follows |
+| Must mock everything | Code is too coupled | Use dependency injection, reduce coupling |
+| Test setup is huge | Too many dependencies | Extract helpers, or simplify the design |
+
+### Self-Check Questions — 反求诸己
+
+When tempted to skip TDD, ask yourself:
+
+- Am I writing code first because I understand the requirement better that way — or because I'm impatient?
+- If I wrote the code first, can I honestly delete it and write from tests? If not — why not?
+- Is the test I'm about to write testing behavior (what it does) or implementation (how it does it)?
+- Would a different developer write the same test from the same requirement?
+
 ### 3. Report Progress
 
 After every 3 completed tasks, report:
@@ -133,6 +195,51 @@ When a subagent returns, it should report one of:
 
 **Do not trust "DONE" blindly.** 三省吾身 (three reflections) applies to agent reports too: verify their changes against the plan, run the test suite yourself, then accept.
 
+### Implementer Prompt Template
+
+When dispatching a subagent for a task, use this structure:
+
+```
+You are implementing Task N of the [feature] plan.
+
+## Context
+[What we're building. What has been done so far. Which tasks are complete.]
+
+## Your Task
+[Copy the task description from the plan, including all steps]
+
+## Files
+- Create: [exact paths]
+- Modify: [exact paths with line ranges if known]
+- Do NOT touch: [files that are out of scope]
+
+## Patterns to Follow
+[Naming conventions, directory structure, import style from the codebase]
+
+## Definition of Done
+Run: [exact test command]
+Expected: [exact output — e.g., "Tests: 5 passed, 5 total"]
+
+## If You Get Stuck
+- If blocked by missing context → report NEEDS_CONTEXT with what you need
+- If blocked by a dependency → report BLOCKED with what is missing
+- If something feels wrong → report DONE_WITH_CONCERNS with your concern
+- Do NOT improvise around blockers. Do NOT modify files outside your scope.
+```
+
+### Handling Subagent Returns
+
+| Status | Action |
+|--------|--------|
+| **DONE** | Verify: read the diff, run the test suite yourself. If tests pass → accept. If not → fix or re-dispatch. |
+| **DONE_WITH_CONCERNS** | Read the concerns. If valid → address before moving on. If not → note and proceed. |
+| **BLOCKED** | Assess the blocker. If it's a plan gap → invoke `bitfrog:plan`. If it's a dependency → resolve sequentially, then re-dispatch. |
+| **NEEDS_CONTEXT** | Provide the missing context and re-dispatch. If you don't have it either → ask the user. |
+
+### For Larger Projects — Per-Task Review
+
+For projects with 10+ tasks, consider reviewing after every 3-5 tasks rather than waiting until the end. 中庸之道 — the right review frequency depends on the project size. Small projects: review at the end. Large projects: review in batches. The measure is: can you still hold the full context of unreviewed changes in mind?
+
 ## Embedded Tools — Verification Before Completion (知行合一)
 
 知行合一 teaches: if you truly know something, that knowledge is inseparable from action. Applied to verification:
@@ -152,6 +259,27 @@ When a subagent returns, it should report one of:
 4. **Confirm** the output matches your claim: "All tests passed", "0 errors", exit code 0
 
 If verification fails, you don't know it works. You only know it doesn't.
+
+### Verification Evidence Table
+
+| Claim | Requires | NOT Sufficient |
+|-------|----------|----------------|
+| "Tests pass" | Fresh test output showing 0 failures | Previous run, "should pass", partial run |
+| "Linter clean" | Linter output: 0 errors, 0 warnings | "Linter passed last time" |
+| "Build succeeds" | Build command: exit code 0 | Linter passing (linter ≠ compiler) |
+| "Bug fixed" | Test for original symptom passes | "Code changed, should be fixed" |
+| "Regression test works" | Red-green verified (test fails without fix, passes with fix) | Test passes once |
+| "Agent completed task" | You verified the diff + ran tests yourself | Agent reported "DONE" |
+| "All requirements met" | Line-by-line checklist against spec | "Tests pass" (tests ≠ requirements) |
+
+### Self-Check — 反求诸己
+
+If you catch yourself thinking any of these, pause:
+
+- "I'm confident this works" — Confidence is not evidence. Run the command.
+- "I just need to commit and move on" — Urgency is not a reason to skip truth.
+- "The agent said it's done" — The agent might be wrong. Verify independently.
+- "This is a trivial change" — Trivial changes break production too. Verify.
 
 **The deeper question:** If you find yourself wanting to skip verification, ask: do I truly understand why I verify? If the answer is "because the rules say so" — you have not yet internalized 知行合一. You verify because claiming without evidence is self-deception, and self-deception produces broken software.
 

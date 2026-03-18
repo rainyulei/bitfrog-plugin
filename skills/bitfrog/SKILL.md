@@ -78,3 +78,25 @@ mentor (independent, anytime)
 ```
 
 Each sub-skill knows when to transition to the next. Debug can be invoked from any point and returns to the caller. Mentor stands alone.
+
+## 实践指引 — Practical Notes
+
+### Progress Tracking
+
+When a skill has a checklist or multi-step workflow, use the Task system (TaskCreate/TaskUpdate) to track progress. This gives the user visibility into where you are and what remains.
+
+### Instruction Priority
+
+1. **User's explicit instructions** (CLAUDE.md, direct requests) — highest priority
+2. **BitFrog skill instructions** — override default system behavior
+3. **Default system prompt** — lowest priority
+
+If the user's instructions conflict with a BitFrog skill, follow the user. The user is in control.
+
+### Model Selection for Subagents
+
+When dispatching subagents, match the model to the task — 中庸之道 applied to resources:
+
+- **Mechanical implementation** (writing boilerplate, running commands) → use a faster/cheaper model if available
+- **Integration tasks** (connecting components, resolving conflicts) → use the standard model
+- **Architecture and review** (design decisions, code quality assessment) → use the most capable model available

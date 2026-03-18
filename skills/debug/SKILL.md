@@ -89,6 +89,81 @@ An architectural issue where the design itself is flawed. No amount of patching 
 
 ---
 
+## 追根溯源 — Root Cause Tracing (Backward Tracing)
+
+When the 5-Why technique points to a code path, trace it backward through the system:
+
+### Technique
+
+1. **Start at the symptom** — the exact line where the error manifests
+2. **Trace backward** through the call chain: who called this function? With what arguments? From where?
+3. **At each level, verify your assumption** — add a log or read the code to confirm the data flow matches your mental model
+4. **Stop when you find the divergence** — the point where reality differs from expectation. That is the root cause.
+
+### Example: Multi-Component Tracing
+
+```
+Symptom: API returns 500 on /users/123
+  ↑ Handler: getUserById throws "Cannot read property 'name' of null"
+    ↑ Service: findUser returns null
+      ↑ Repository: SQL query returns empty result
+        ↑ Migration: 'users' table missing 'active' column used in WHERE clause
+          ↑ Root cause: migration 027 was not included in latest deploy script
+```
+
+Each level required one targeted query (a log, a SQL check, a file read) — not guessing.
+
+### Multi-Component Diagnostic
+
+When the system has multiple layers (API → Service → Queue → Worker → DB), add a trace marker at each boundary:
+
+```bash
+# Quick diagnostic: add logging at each component boundary
+echo "[DEBUG] API received request: $REQUEST_ID"
+echo "[DEBUG] Service processed: $REQUEST_ID, result: $RESULT"
+echo "[DEBUG] Worker picked up: $REQUEST_ID"
+```
+
+Then reproduce the bug and follow the trace marker through the logs. The component where the marker disappears or the data changes is your investigation target.
+
+## 防御深度 — Defense in Depth (Post-Fix Validation)
+
+After finding and fixing the root cause, add validation at multiple layers to prevent recurrence:
+
+| Layer | What to add | Example |
+|-------|-------------|---------|
+| **Entry point** | Input validation | Reject missing fields before they propagate |
+| **Business logic** | Precondition checks | Assert invariants at function entry |
+| **Data layer** | Constraint enforcement | DB constraints, NOT NULL, foreign keys |
+| **Test suite** | Regression test | The specific scenario that exposed this bug |
+
+The regression test alone is not enough. If the same type of error can enter through a different path, it will. Defense in depth means closing the class of errors, not just the instance.
+
+## 时序问题 — Timing Issues (Condition-Based Waiting)
+
+For intermittent/flaky failures, suspect timing issues first:
+
+**Replace arbitrary waits with condition-based polling:**
+
+```typescript
+// Bad: arbitrary timeout
+await sleep(3000);
+expect(result).toBeDefined();
+
+// Good: wait for the actual condition
+await waitFor(() => expect(result).toBeDefined(), { timeout: 5000 });
+```
+
+**Common timing patterns:**
+
+| Pattern | Symptom | Fix |
+|---------|---------|-----|
+| Race condition | Passes sometimes, fails under load | Add proper synchronization or sequencing |
+| Stale cache | Old data returned after update | Invalidate cache, or wait for propagation |
+| Event ordering | Works locally, fails in CI | Make the test wait for the event, not a timer |
+
+---
+
 ## Anti-Patterns — 禁忌 Jin Ji
 
 These are traps. Avoid them absolutely.
@@ -97,6 +172,25 @@ These are traps. Avoid them absolutely.
 - **Never fix symptoms without understanding the cause.** A suppressed symptom will resurface worse.
 - **If 3+ attempted fixes fail, STOP.** You are likely questioning the wrong thing. Step back and question the architecture, not your fix.
 - **"It works now but I don't know why" is not fixed** — it is a time bomb. Find out why, or it will detonate in production.
+
+### Self-Check — 反求诸己
+
+When tempted to skip investigation and jump to a fix:
+
+- Have I completed all four diagnostic methods (望闻问切), or did I skip to 切?
+- Am I forming a hypothesis, or am I guessing?
+- If this fix doesn't work, do I have a next hypothesis — or will I be guessing again?
+- Can I explain to someone else WHY this fix should work?
+
+### Quick Reference
+
+| Phase | Activities | You're done when... |
+|-------|-----------|---------------------|
+| 望 Observe | Error message, blast radius, frequency, timing | You can describe the symptom precisely |
+| 闻 Listen | Logs, environment, recent changes | You know what changed and what the system is doing |
+| 问 Inquire | 5-Why, call path tracing, hypothesis formation | You have a ranked list of likely causes |
+| 切 Examine | Code reading, targeted logging, minimal repro | You've confirmed the root cause with evidence |
+| 治 Treat | Fix + regression test + defense in depth | The fix is verified and the class of error is prevented |
 
 ---
 

@@ -20,7 +20,12 @@ Self-reflection reveals blind spots. Peer-reflection provides independent perspe
 Before asking anyone else, examine your own work first.
 
 1. **Load the plan/spec document** — reread the original requirements, acceptance criteria, and task list.
-2. **Run `git diff` against the base branch** — see exactly what changed.
+2. **Determine the review range** — get the exact SHAs:
+   ```bash
+   BASE_SHA=$(git merge-base HEAD main 2>/dev/null || git merge-base HEAD master)
+   HEAD_SHA=$(git rev-parse HEAD)
+   git diff ${BASE_SHA}..${HEAD_SHA}
+   ```
 3. **Compare**: does the implementation match the plan?
 4. **Flag deviations**:
    - Missing tasks — work specified in the plan that was not implemented.
@@ -139,28 +144,73 @@ Replace them with genuine engagement:
 - "I see what you mean. The tradeoff is..." (then explain the tradeoff)
 - "Can you clarify what you mean by X?" (when genuinely unclear)
 
+### When to Push Back
+
+Push back is not defiance — it is 知行合一. If you implement something you know is wrong, you have violated the unity of knowledge and action.
+
+Push back when:
+- The suggestion would break existing functionality
+- The reviewer lacks context about a deliberate design choice
+- The suggestion violates YAGNI (adds unused complexity)
+- The suggestion is technically incorrect (verify first!)
+- The suggestion conflicts with the spec/plan
+
+How to push back well:
+- State what you understand their concern to be
+- Explain why you disagree, with evidence (code references, test results)
+- Offer an alternative if you have one
+- Accept gracefully if they convince you — being wrong about pushback is fine
+
+### Implementation Order for Review Fixes
+
+When multiple issues are found:
+1. **Critical issues first** — these block correctness
+2. **Simple fixes next** — quick wins, verify each individually
+3. **Complex fixes last** — these need thought, test thoroughly
+4. Run the full test suite after ALL fixes, not just after each one
+
 ---
 
 ## Embedded Tools — Finish Branch
 
-After review passes all three reflections, present exactly four options to the user:
+### Pre-Completion Gate
 
-1. **Merge locally**
-   ```bash
-   git checkout main && git merge feature-branch
-   ```
+Before presenting completion options, verify:
 
-2. **Create PR**
-   ```bash
-   gh pr create --title "..." --body "..."
-   ```
+```bash
+# Run the full test suite
+npm test   # or cargo test, pytest, go test ./..., etc.
 
-3. **Keep as-is** — leave the branch for later work or manual review.
+# Run linter/type checker
+npm run lint   # or equivalent
+```
 
-4. **Discard** — confirm with the user first, then:
-   ```bash
-   git branch -D feature-branch
-   ```
+**If tests fail, STOP.** Do not present completion options. Fix the failures first and re-run self-reflection.
+
+### Determine Base Branch
+
+```bash
+BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+```
+
+### Completion Options
+
+Present exactly four options to the user:
+
+| Option | What happens | When to recommend |
+|--------|-------------|-------------------|
+| **1. Merge locally** | `git checkout $BASE_BRANCH && git merge feature-branch` | Small changes, single developer |
+| **2. Create PR** | `gh pr create --title "..." --body "..."` | Team projects, needs review |
+| **3. Keep as-is** | Leave the branch for later | Work in progress, needs more thought |
+| **4. Discard** | Delete the branch entirely | Experiment that didn't work out |
+
+**For option 4 (Discard):** Require explicit confirmation. Ask the user to type "discard" to confirm. Accidental deletion of work is irreversible.
+
+```bash
+# Only after user types "discard"
+git checkout $BASE_BRANCH
+git branch -D feature-branch
+```
 
 ### Worktree Cleanup
 
@@ -169,6 +219,8 @@ If the work was done inside a git worktree, clean it up after the user chooses a
 ```bash
 cd /original/repo
 git worktree remove ../worktree-dir
+# Verify cleanup
+git worktree list
 ```
 
 ---
