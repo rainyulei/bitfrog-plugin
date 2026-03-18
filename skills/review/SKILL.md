@@ -15,40 +15,23 @@ Self-reflection reveals blind spots. Peer-reflection provides independent perspe
 
 ## Three Reflections Workflow
 
-### 一省 — 自省 Zi Sheng (Self-Reflection): Spec Compliance
+### 一省 — 自省 Zi Sheng (Self-Reflection): Did I do what I was supposed to do?
 
-Before asking anyone else, examine your own work first.
+Before asking anyone else, be honest with yourself.
 
-1. **Load the plan/spec document** — reread the original requirements, acceptance criteria, and task list.
-2. **Determine the review range** — get the exact SHAs:
+1. **Reread the plan/spec** — not from memory, from the actual document. Memory drifts. Documents don't.
+2. **Look at what you actually changed:**
    ```bash
    BASE_SHA=$(git merge-base HEAD main 2>/dev/null || git merge-base HEAD master)
-   HEAD_SHA=$(git rev-parse HEAD)
-   git diff ${BASE_SHA}..${HEAD_SHA}
+   git diff ${BASE_SHA}..HEAD --stat
    ```
-3. **Scope Drift Detection — 偏则正之 (When drifting, correct course)**:
-   Compare `git diff --stat` against the stated intent (plan/spec/commit messages):
+3. **Ask yourself honestly:**
+   - Is everything in the plan also in the diff? If a task is missing, that's an omission — not "deferred."
+   - Is everything in the diff also in the plan? If there are extra changes, that's drift — not "while I was in there."
+   - Does what I built match what was asked for? Or did I build what I *thought* was asked for?
+4. **Run the tests.** Not from memory — run them now and read the output.
 
-   ```
-   Scope Check: [CLEAN / DRIFT DETECTED / REQUIREMENTS MISSING]
-   Intent: <1-line summary of what was requested>
-   Delivered: <1-line summary of what the diff actually does>
-   [If drift: list each out-of-scope change]
-   [If missing: list each unaddressed requirement]
-   ```
-
-   Watch for:
-   - **Scope creep** — files changed that are unrelated to the stated intent, "while I was in there" changes
-   - **Missing requirements** — tasks from the plan not addressed in the diff
-   - **Partial implementations** — started but not finished
-
-4. **Flag deviations**:
-   - Missing tasks — work specified in the plan that was not implemented.
-   - Extra changes — modifications not called for in the plan (scope creep).
-   - Spec misinterpretations — implemented something, but not what was actually asked for.
-5. **Check**: are all tests passing? Run the test suite and confirm green.
-
-If self-reflection finds gaps, fix them before moving to peer-reflection. Do not waste the reviewer's time on known issues.
+If self-reflection finds problems, fix them before asking anyone else to review. Sending known-broken work for peer review wastes everyone's time — and violates 知行合一 (if you know it's broken, act on that knowledge).
 
 #### Plan Review — 格物致知 applied to plans
 
@@ -79,37 +62,15 @@ The subagent reviews for:
 | Debuggability   | Meaningful errors, logging, traceable control flow     |
 | Error handling  | Edge cases covered, failures handled gracefully        |
 
-**Fix-First Review — 行胜于言 (Action speaks louder than words):**
+**How to act on findings — 辩证论治 applied to review:**
 
-Don't just list problems — fix them. For each finding from the reviewer:
+Not all problems are the same kind. A typo and a race condition are both "issues," but they need different treatment:
 
-1. **AUTO-FIX** — If the fix is mechanical and unambiguous (typo, missing import, obvious null check, style issue): fix it directly. Report: `[AUTO-FIXED] file:line — Problem → What you did`
+- If you **understand the fix and it's unambiguous** (typo, missing import, style): just fix it. Listing obvious fixes without acting on them is 知 without 行.
+- If the fix **requires judgment** (architecture tradeoff, unclear intent, multiple valid approaches): ask the user. Present what you understand, what the options are, and what you recommend. Don't fix something you don't fully understand.
+- If the issue is **critical** (data loss, security, correctness): always confirm with the user before acting, even if the fix seems obvious. The cost of asking is low; the cost of a wrong critical fix is high.
 
-2. **ASK** — If the fix requires judgment (architecture choice, tradeoff decision, unclear intent): present to the user with options and your recommendation.
-
-Batch all ASK items into a single question to minimize interruption:
-
-```
-Auto-fixed 4 issues. 2 need your input:
-
-1. [Important] src/auth.ts:42 — Race condition in token refresh
-   Fix: Add mutex lock around refresh call
-   → A) Fix as recommended  B) Skip
-
-2. [Suggestion] src/api.ts:88 — Error message exposes internal path
-   Fix: Replace with generic error
-   → A) Fix  B) Skip
-
-RECOMMENDATION: Fix #1 (real concurrency bug). #2 is low-risk, your call.
-```
-
-**Severity guide for Fix-First routing:**
-
-| Severity     | Default Action |
-|--------------|----------------|
-| **Critical** | ASK — always get user confirmation for critical fixes |
-| **Important**| AUTO-FIX if mechanical, ASK if judgmental |
-| **Suggestion**| AUTO-FIX if trivial, otherwise note and move on |
+This is 辩证论治 — diagnose the nature of each finding, then apply the appropriate treatment. Surface issues get direct treatment. Deep issues need consultation.
 
 #### Reviewer Dispatch Prompt Template
 
