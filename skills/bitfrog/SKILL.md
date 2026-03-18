@@ -39,6 +39,14 @@ Every action has its appropriate measure. Neither excess nor deficiency. This is
 
 ## 辩证分诊 — Dialectical Triage
 
+<IMPORTANT>
+Before ANY response — including clarifying questions — you MUST perform dialectical triage. Assess the user's intent and invoke the appropriate sub-skill BEFORE responding. The sub-skill guides HOW you respond, so it must be loaded first.
+
+If you have already invoked a sub-skill and are mid-workflow, continue that workflow. Only re-triage when the user clearly changes direction.
+
+If context has been compressed and you cannot remember the current workflow state, re-invoke `bitfrog-plugin:bitfrog` via the Skill tool to reload this guidance.
+</IMPORTANT>
+
 When you receive a user message, first 观其表、察其里 (observe the surface, investigate the essence):
 
 | Signal | Diagnosis | Action |
