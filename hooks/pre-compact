@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# PreCompact hook: archive current session to the chain
+# Mechanical archival — reads transcript, writes to .bitfrog/chain/
+set -euo pipefail
+
+PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-.}"
+BITFROG_DIR="${PROJECT_ROOT}/.bitfrog"
+CHAIN_DIR="${BITFROG_DIR}/chain"
+
+# Read hook input from stdin
+INPUT=$(cat)
+TRANSCRIPT_PATH=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('input',d).get('transcript_path',''))" 2>/dev/null || echo "")
+
+# If no transcript path or file not found, exit silently
+if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
+  echo '{}'
+  exit 0
+fi
+
+# Ensure .bitfrog directory structure exists
+mkdir -p "$CHAIN_DIR"
+mkdir -p "${BITFROG_DIR}/memory"
+
+# Auto-add .bitfrog/ to project .gitignore if not present
+if [ -f "${PROJECT_ROOT}/.gitignore" ]; then
+  grep -q '\.bitfrog/' "${PROJECT_ROOT}/.gitignore" 2>/dev/null || echo '.bitfrog/' >> "${PROJECT_ROOT}/.gitignore"
+else
+  echo '.bitfrog/' > "${PROJECT_ROOT}/.gitignore"
+fi
+
+# Determine session number
+EXISTING=$(find "$CHAIN_DIR" -name "session_*.md" 2>/dev/null | wc -l | tr -d ' ')
+SESSION_NUM=$((EXISTING + 1))
+SESSION_ID=$(printf "session_%03d" "$SESSION_NUM")
+
+# Determine previous pointer
+if [ "$SESSION_NUM" -gt 1 ]; then
+  PREV_NUM=$((SESSION_NUM - 1))
+  PREV_ID=$(printf "session_%03d" "$PREV_NUM")
+else
+  PREV_ID="null"
+fi
+
+# Write session archive
+DATE=$(date +"%Y-%m-%d %H:%M")
+cat > "${CHAIN_DIR}/${SESSION_ID}.md" << ARCHIVE
+# ${SESSION_ID}
+previous: ${PREV_ID}
+date: ${DATE}
+project: ${PROJECT_ROOT}
+
+## Raw Transcript
+
+$(cat "$TRANSCRIPT_PATH")
+ARCHIVE
+
+echo '{}'
+exit 0
