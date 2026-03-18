@@ -11,6 +11,29 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "auto|manual",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact\"",
+            "async": false
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "auto|manual",
+        "hooks": [
+          {
+            "type": "agent",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/post-compact-prompt.md\""
+          }
+        ]
+      }
     ]
   }
 }
