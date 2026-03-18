@@ -7,9 +7,19 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+# Verify brain skill exists
+BRAIN_PATH="${PLUGIN_ROOT}/skills/bitfrog/SKILL.md"
+if [ ! -f "$BRAIN_PATH" ]; then
+  echo '{"error": "BitFrog brain skill not found at '"$BRAIN_PATH"'"}' >&2
+  exit 1
+fi
+
 # Read brain skill content and strip frontmatter
-raw_content=$(cat "${PLUGIN_ROOT}/skills/bitfrog/SKILL.md" 2>&1 || echo "Error reading bitfrog brain skill")
+raw_content=$(cat "$BRAIN_PATH")
 brain_content=$(echo "$raw_content" | awk 'BEGIN{fm=0} /^---$/{fm++;next} fm>=2{print}')
+
+# Fallback: if frontmatter stripping produced empty output, use raw content
+[ -z "$brain_content" ] && brain_content="$raw_content"
 
 # Escape string for JSON embedding
 escape_for_json() {

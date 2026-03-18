@@ -218,7 +218,7 @@ git worktree list
 |--------------|--------------------------------|--------------|
 | **Critical** | Must fix — blocks correctness  | Fix now      |
 | **Important**| Should fix — affects quality   | Fix before done |
-| **Minor**    | Nice to have — polish          | Note it      |
+| **Suggestion**| Nice to have — polish          | Note it      |
 
 ---
 
