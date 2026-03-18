@@ -26,7 +26,22 @@ Before asking anyone else, examine your own work first.
    HEAD_SHA=$(git rev-parse HEAD)
    git diff ${BASE_SHA}..${HEAD_SHA}
    ```
-3. **Compare**: does the implementation match the plan?
+3. **Scope Drift Detection — 偏则正之 (When drifting, correct course)**:
+   Compare `git diff --stat` against the stated intent (plan/spec/commit messages):
+
+   ```
+   Scope Check: [CLEAN / DRIFT DETECTED / REQUIREMENTS MISSING]
+   Intent: <1-line summary of what was requested>
+   Delivered: <1-line summary of what the diff actually does>
+   [If drift: list each out-of-scope change]
+   [If missing: list each unaddressed requirement]
+   ```
+
+   Watch for:
+   - **Scope creep** — files changed that are unrelated to the stated intent, "while I was in there" changes
+   - **Missing requirements** — tasks from the plan not addressed in the diff
+   - **Partial implementations** — started but not finished
+
 4. **Flag deviations**:
    - Missing tasks — work specified in the plan that was not implemented.
    - Extra changes — modifications not called for in the plan (scope creep).
@@ -64,13 +79,37 @@ The subagent reviews for:
 | Debuggability   | Meaningful errors, logging, traceable control flow     |
 | Error handling  | Edge cases covered, failures handled gracefully        |
 
-**Act on feedback by severity:**
+**Fix-First Review — 行胜于言 (Action speaks louder than words):**
 
-| Severity     | Action                                    |
-|--------------|-------------------------------------------|
-| **Critical** | Must fix immediately before proceeding.   |
-| **Important**| Should fix before completing the task.    |
-| **Suggestion**| Note for future improvement. Don't block.|
+Don't just list problems — fix them. For each finding from the reviewer:
+
+1. **AUTO-FIX** — If the fix is mechanical and unambiguous (typo, missing import, obvious null check, style issue): fix it directly. Report: `[AUTO-FIXED] file:line — Problem → What you did`
+
+2. **ASK** — If the fix requires judgment (architecture choice, tradeoff decision, unclear intent): present to the user with options and your recommendation.
+
+Batch all ASK items into a single question to minimize interruption:
+
+```
+Auto-fixed 4 issues. 2 need your input:
+
+1. [Important] src/auth.ts:42 — Race condition in token refresh
+   Fix: Add mutex lock around refresh call
+   → A) Fix as recommended  B) Skip
+
+2. [Suggestion] src/api.ts:88 — Error message exposes internal path
+   Fix: Replace with generic error
+   → A) Fix  B) Skip
+
+RECOMMENDATION: Fix #1 (real concurrency bug). #2 is low-risk, your call.
+```
+
+**Severity guide for Fix-First routing:**
+
+| Severity     | Default Action |
+|--------------|----------------|
+| **Critical** | ASK — always get user confirmation for critical fixes |
+| **Important**| AUTO-FIX if mechanical, ASK if judgmental |
+| **Suggestion**| AUTO-FIX if trivial, otherwise note and move on |
 
 #### Reviewer Dispatch Prompt Template
 

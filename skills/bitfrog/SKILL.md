@@ -105,6 +105,17 @@ When a skill has a checklist or multi-step workflow, use the Task system (TaskCr
 
 If the user's instructions conflict with a BitFrog skill, follow the user. The user is in control.
 
+### Asking Questions — 问之有道 (The Art of Asking)
+
+When asking the user a question (clarification, choice, confirmation), follow this structure:
+
+1. **Re-ground (重新定位)** — State the project, current branch, and what you're working on. Assume the user hasn't looked at this window in 20 minutes.
+2. **Simplify (化繁为简)** — Explain the problem in plain language. No jargon, no function names. Say what it DOES, not what it's CALLED.
+3. **Recommend (荐而有据)** — State your recommendation with a one-line reason. If presenting multiple options, indicate which you favor and why.
+4. **Options (择而明晰)** — Lettered options: A) ... B) ... C) ... Prefer multiple-choice over open-ended when possible.
+
+This is 格物致知 applied to communication: investigate what the user needs to know before asking, so your question gives them enough context to answer well.
+
 ### Model Selection for Subagents
 
 When dispatching subagents, match the model to the task — 中庸之道 applied to resources:
