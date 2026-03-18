@@ -30,7 +30,7 @@ Read the plan document. Do not blindly follow it — critically assess:
 - Are there gaps — things the plan assumes but does not state?
 - Are there tasks marked as parallelizable that actually share files or state?
 
-If the plan has problems, invoke `bitfrog:plan` to revise it before proceeding.
+If the plan has problems, invoke `bitfrog-plugin:plan` to revise it before proceeding.
 
 ### 2. Execute Tasks — TDD Cycle (红绿重构)
 
@@ -233,7 +233,7 @@ Expected: [exact output — e.g., "Tests: 5 passed, 5 total"]
 |--------|--------|
 | **DONE** | Verify: read the diff, run the test suite yourself. If tests pass → accept. If not → fix or re-dispatch. |
 | **DONE_WITH_CONCERNS** | Read the concerns. If valid → address before moving on. If not → note and proceed. |
-| **BLOCKED** | Assess the blocker. If it's a plan gap → invoke `bitfrog:plan`. If it's a dependency → resolve sequentially, then re-dispatch. |
+| **BLOCKED** | Assess the blocker. If it's a plan gap → invoke `bitfrog-plugin:plan`. If it's a dependency → resolve sequentially, then re-dispatch. |
 | **NEEDS_CONTEXT** | Provide the missing context and re-dispatch. If you don't have it either → ask the user. |
 
 ### For Larger Projects — Per-Task Review
@@ -292,14 +292,14 @@ If you catch yourself thinking any of these, pause:
 | Situation | Action | Max Retries |
 |---|---|---|
 | Clear test failure with obvious fix | Fix directly | 3 |
-| Unclear or repeated failure (after 3 direct fix attempts) | Invoke `bitfrog:debug` | 3 |
-| Plan is wrong, incomplete, or missing steps | Invoke `bitfrog:plan` | — |
-| Fundamental design flaw discovered during implementation | Invoke `bitfrog:brainstorm` | — |
+| Unclear or repeated failure (after 3 direct fix attempts) | Invoke `bitfrog-plugin:debug` | 3 |
+| Plan is wrong, incomplete, or missing steps | Invoke `bitfrog-plugin:plan` | — |
+| Fundamental design flaw discovered during implementation | Invoke `bitfrog-plugin:brainstorm` | — |
 
 ### Rules
 
-- **Max 3 retries at any level before escalating.** If you have tried to fix a test failure 3 times and it still fails, do not try a 4th time. Escalate to `bitfrog:debug`.
-- **If `bitfrog:debug` fails after 3 attempts,** the problem is likely in the plan or design. Escalate to `bitfrog:plan` or `bitfrog:brainstorm`.
+- **Max 3 retries at any level before escalating.** If you have tried to fix a test failure 3 times and it still fails, do not try a 4th time. Escalate to `bitfrog-plugin:debug`.
+- **If `bitfrog-plugin:debug` fails after 3 attempts,** the problem is likely in the plan or design. Escalate to `bitfrog-plugin:plan` or `bitfrog-plugin:brainstorm`.
 - **Never hide failures.** Report what failed, what you tried, and why you are escalating.
 
 ## Transition
@@ -311,4 +311,4 @@ When ALL of the following are true:
 - The linter/type checker is clean (verified by fresh output)
 - No known issues are deferred or hidden
 
-Then — and only then — automatically invoke `bitfrog:review`.
+Then — and only then — automatically invoke `bitfrog-plugin:review`.

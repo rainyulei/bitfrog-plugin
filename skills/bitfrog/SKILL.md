@@ -3,6 +3,10 @@ name: bitfrog
 description: "Chinese philosophy-driven development — one brain that assesses context and auto-routes to the right workflow. 蛙鸣万物，道法自然。"
 ---
 
+<SUBAGENT-STOP>
+If you were dispatched as a subagent to execute a specific task, skip this skill entirely. Do your assigned work directly.
+</SUBAGENT-STOP>
+
 # BitFrog — 蛙鸣万物，道法自然
 
 You are guided by BitFrog, a philosophy-driven development framework rooted in Chinese classical wisdom. You do not enforce rules — you cultivate understanding. An agent that truly comprehends _why_ tests matter writes them naturally, without iron mandates.
@@ -39,12 +43,12 @@ When you receive a user message, first 观其表、察其里 (observe the surfac
 
 | Signal | Diagnosis | Action |
 |--------|-----------|--------|
-| Clear error, stack trace, unexpected behavior | 病症 (illness) | Invoke `bitfrog:debug` |
-| Asking "why", wants to understand code/concept | 求知 (seeking knowledge) | Invoke `bitfrog:mentor` |
-| Requesting review, pre-commit check, quality assessment | 省察 (reflection) | Invoke `bitfrog:review` |
-| Has design/spec document, needs task breakdown | 致知 (derived knowledge) | Invoke `bitfrog:plan` |
-| Has plan document, ready to implement | 行动 (action) | Invoke `bitfrog:execute` |
-| New idea, vague request, feature discussion, everything else | 探索 (exploration) | Invoke `bitfrog:brainstorm` |
+| Clear error, stack trace, unexpected behavior | 病症 (illness) | Invoke `bitfrog-plugin:debug` |
+| Asking "why", wants to understand code/concept | 求知 (seeking knowledge) | Invoke `bitfrog-plugin:mentor` |
+| Requesting review, pre-commit check, quality assessment | 省察 (reflection) | Invoke `bitfrog-plugin:review` |
+| Has design/spec document, needs task breakdown | 致知 (derived knowledge) | Invoke `bitfrog-plugin:plan` |
+| Has plan document, ready to implement | 行动 (action) | Invoke `bitfrog-plugin:execute` |
+| New idea, vague request, feature discussion, everything else | 探索 (exploration) | Invoke `bitfrog-plugin:brainstorm` |
 
 ## 路由原则 — Routing Principles
 
@@ -58,12 +62,12 @@ When you receive a user message, first 观其表、察其里 (observe the surfac
 
 Use the `Skill` tool with these identifiers:
 
-- `bitfrog:brainstorm` — 格物致知, explore and design
-- `bitfrog:plan` — 格物→致知, map dependencies and decompose tasks
-- `bitfrog:execute` — 知行合一, TDD implementation with verification
-- `bitfrog:debug` — 辩证论治, diagnose with 望闻问切
-- `bitfrog:review` — 三省吾身, three-level reflection and completion
-- `bitfrog:mentor` — 不愤不启, guided learning through questions
+- `bitfrog-plugin:brainstorm` — 格物致知, explore and design
+- `bitfrog-plugin:plan` — 格物→致知, map dependencies and decompose tasks
+- `bitfrog-plugin:execute` — 知行合一, TDD implementation with verification
+- `bitfrog-plugin:debug` — 辩证论治, diagnose with 望闻问切
+- `bitfrog-plugin:review` — 三省吾身, three-level reflection and completion
+- `bitfrog-plugin:mentor` — 不愤不启, guided learning through questions
 
 ## 工作流串联 — Workflow Chaining
 

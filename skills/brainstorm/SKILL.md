@@ -137,4 +137,4 @@ This is non-negotiable. No exceptions. If the user asks to skip design, explain 
 When the user approves the design:
 
 1. Confirm approval explicitly: "Design approved. Proceeding to planning."
-2. Auto-invoke `bitfrog:plan` to begin implementation planning based on the approved spec.
+2. Auto-invoke `bitfrog-plugin:plan` to begin implementation planning based on the approved spec.

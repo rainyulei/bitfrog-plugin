@@ -84,7 +84,7 @@ An architectural issue where the design itself is flawed. No amount of patching 
 
 **Treatment:**
 - Do NOT patch. Patching a flawed architecture creates compounding debt.
-- Invoke `bitfrog:brainstorm` to redesign the affected area.
+- Invoke `bitfrog-plugin:brainstorm` to redesign the affected area.
 - The fix lives at a different level than the symptom.
 
 ---
@@ -197,4 +197,4 @@ When tempted to skip investigation and jump to a fix:
 ## Transition
 
 - **Fix complete** → Return to the caller (`execute` or standalone workflow).
-- **Deep issue identified** → Invoke `bitfrog:brainstorm` to redesign before attempting a fix.
+- **Deep issue identified** → Invoke `bitfrog-plugin:brainstorm` to redesign before attempting a fix.

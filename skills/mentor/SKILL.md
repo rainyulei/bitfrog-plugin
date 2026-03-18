@@ -59,4 +59,4 @@ At the end of each interaction, show:
 
 ## Transition — 转换
 
-Independent — does not auto-chain to other skills. May suggest switching to `bitfrog:debug` or `bitfrog:execute` when appropriate.
+Independent — does not auto-chain to other skills. May suggest switching to `bitfrog-plugin:debug` or `bitfrog-plugin:execute` when appropriate.

@@ -191,7 +191,7 @@ Every plan follows this structure:
 ```markdown
 # [Feature] Implementation Plan
 
-> For agentic workers: Use bitfrog:execute to implement this plan.
+> For agentic workers: Use bitfrog-plugin:execute to implement this plan.
 
 **Goal:** [one sentence]
 **Architecture:** [2-3 sentences]
@@ -213,6 +213,6 @@ Every plan follows this structure:
 
 When the plan is complete and confirmed by the user:
 
-- Auto-invoke `bitfrog:execute` to begin implementation
+- Auto-invoke `bitfrog-plugin:execute` to begin implementation
 - Pass the plan document path so the execute phase can track progress
 - The execute phase will work through tasks sequentially (and in parallel where marked)
