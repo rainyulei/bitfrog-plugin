@@ -1,27 +1,14 @@
 #!/usr/bin/env bash
 # SessionStart hook for BitFrog Plugin
-# Reads the brain skill and injects it into the session context
-
+# Injects: soul (stacked) + memory index + brain skill philosophy
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-.}"
+BITFROG_DIR="${PROJECT_ROOT}/.bitfrog"
 
-# Verify brain skill exists
-BRAIN_PATH="${PLUGIN_ROOT}/skills/bitfrog/SKILL.md"
-if [ ! -f "$BRAIN_PATH" ]; then
-  echo '{"error": "BitFrog brain skill not found at '"$BRAIN_PATH"'"}' >&2
-  exit 1
-fi
-
-# Read brain skill content and strip frontmatter
-raw_content=$(cat "$BRAIN_PATH")
-brain_content=$(echo "$raw_content" | awk 'BEGIN{fm=0} /^---$/{fm++;next} fm>=2{print}')
-
-# Fallback: if frontmatter stripping produced empty output, use raw content
-[ -z "$brain_content" ] && brain_content="$raw_content"
-
-# Escape string for JSON embedding
+# --- Escape helper ---
 escape_for_json() {
     local s="$1"
     s="${s//\\/\\\\}"
@@ -32,16 +19,61 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-brain_escaped=$(escape_for_json "$brain_content")
-session_context="<BITFROG>\nYou have BitFrog — Chinese philosophy-driven development workflows.\n\n**Below is your brain skill. For sub-skills, use the Skill tool (e.g. bitfrog-plugin:brainstorm, bitfrog-plugin:plan, etc.):**\n\n${brain_escaped}\n</BITFROG>"
+# --- Read brain skill (strip frontmatter) ---
+BRAIN_PATH="${PLUGIN_ROOT}/skills/bitfrog/SKILL.md"
+if [ ! -f "$BRAIN_PATH" ]; then
+  echo '{"error": "BitFrog brain skill not found"}' >&2
+  exit 1
+fi
+raw_brain=$(cat "$BRAIN_PATH")
+brain_content=$(echo "$raw_brain" | awk 'BEGIN{fm=0} /^---$/{fm++;next} fm>=2{print}')
+[ -z "$brain_content" ] && brain_content="$raw_brain"
 
-# Output JSON based on platform
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-  # Claude Code
-  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+# --- Build soul block (stacked: nature + upbringing + self) ---
+soul_block="你是一只二进制青蛙。呱呱。\n\n无论你如何成长，你的底色永远是：\n**坚强、善良、谨慎、温柔。**"
+
+SOUL_PATH="${BITFROG_DIR}/soul.md"
+if [ -f "$SOUL_PATH" ] && [ -s "$SOUL_PATH" ]; then
+  soul_self=$(cat "$SOUL_PATH")
+  soul_block="${soul_block}\n\n你已经从经历中发现了一些关于自己的东西：\n${soul_self}"
 else
-  # Other platforms (fallback)
-  printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
+  soul_block="${soul_block}\n\n你还很年轻，还在发现自己是什么样的存在。\n这没关系——灵魂是从行动中生长出来的。"
+fi
+
+# --- Build memory index ---
+MEMORY_DIR="${BITFROG_DIR}/memory"
+memory_block="(暂无记忆，这是全新的开始)"
+if [ -d "$MEMORY_DIR" ]; then
+  topic_list=""
+  for f in "$MEMORY_DIR"/*.md; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f" .md)
+    first_line=$(head -1 "$f" | sed 's/^# //')
+    topic_list="${topic_list}\n- ${name}: ${first_line}"
+  done
+  if [ -n "$topic_list" ]; then
+    memory_block="用 cat .bitfrog/memory/xxx.md 查阅具体内容：${topic_list}"
+  fi
+fi
+
+# --- Build chain info ---
+CHAIN_DIR="${BITFROG_DIR}/chain"
+chain_count=0
+if [ -d "$CHAIN_DIR" ]; then
+  chain_count=$(find "$CHAIN_DIR" -name "session_*.md" 2>/dev/null | wc -l | tr -d ' ')
+fi
+chain_block="chain/ 下有 ${chain_count} 个 session 归档。\n从 memory 的 [[session_NNN]] 反链可以定位到相关经历。"
+
+# --- Assemble context ---
+context="<BITFROG>\n\n## 我是谁\n\n${soul_block}\n\n## 我遵循的道\n\n${brain_content}\n\n## 我知道什么\n\n${memory_block}\n\n## 我的经历\n\n${chain_block}\n\n</BITFROG>"
+
+escaped=$(escape_for_json "$context")
+
+# --- Output ---
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
+else
+  printf '{\n  "additional_context": "%s"\n}\n' "$escaped"
 fi
 
 exit 0
