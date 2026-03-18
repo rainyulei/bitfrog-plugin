@@ -1,0 +1,16 @@
+{
+  "name": "bitfrog-plugin",
+  "description": "Chinese philosophy-driven development workflows — one brain, many paths",
+  "version": "1.0.0",
+  "author": {
+    "name": "rainlei"
+  },
+  "homepage": "https://github.com/rainyulei/bitfrog-plugin",
+  "repository": "https://github.com/rainyulei/bitfrog-plugin",
+  "license": "MIT",
+  "keywords": ["skills", "chinese-philosophy", "tdd", "debugging", "brainstorm", "bitfrog"],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "commands": "./commands/",
+  "hooks": "./hooks/hooks.json"
+}

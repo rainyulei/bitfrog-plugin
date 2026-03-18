@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# SessionStart hook for BitFrog Plugin
+# Reads the brain skill and injects it into the session context
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Read brain skill content
+brain_content=$(cat "${PLUGIN_ROOT}/skills/bitfrog/SKILL.md" 2>&1 || echo "Error reading bitfrog brain skill")
+
+# Escape string for JSON embedding
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+brain_escaped=$(escape_for_json "$brain_content")
+session_context="<BITFROG>\nYou have BitFrog — Chinese philosophy-driven development workflows.\n\n**Below is your brain skill. For sub-skills, use the Skill tool (e.g. bitfrog:brainstorm, bitfrog:plan, etc.):**\n\n${brain_escaped}\n</BITFROG>"
+
+# Output JSON based on platform
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  # Claude Code
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+else
+  # Other platforms (fallback)
+  printf '{\n  "additional_context": "%s"\n}\n' "$session_context"
+fi
+
+exit 0
