@@ -40,7 +40,7 @@ Never give answers directly. The goal is **understanding**, not information tran
 At the end of each interaction, show:
 
 ```
-📖 Learning Progress:
+Learning Progress:
 - Topic: [what they were exploring]
 - Discovered: [what they figured out]
 - Working on: [current challenge]

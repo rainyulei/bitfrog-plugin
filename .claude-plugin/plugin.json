@@ -8,7 +8,7 @@
   "homepage": "https://github.com/rainyulei/bitfrog-plugin",
   "repository": "https://github.com/rainyulei/bitfrog-plugin",
   "license": "MIT",
-  "keywords": ["skills", "chinese-philosophy", "tdd", "debugging", "brainstorm", "bitfrog"],
+  "keywords": ["skills", "chinese-philosophy", "tdd", "debugging", "brainstorm", "bitfrog", "workflows"],
   "skills": "./skills/",
   "commands": "./commands/"
 }

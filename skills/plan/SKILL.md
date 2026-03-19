@@ -157,7 +157,7 @@ Check these locations in priority order:
 
 1. **Verify gitignore** — Ensure the worktree directory pattern is ignored:
    ```bash
-   grep -qE '\.?worktrees/' .gitignore || echo '.worktrees/' >> .gitignore
+   grep -qE '\.?worktrees/' .gitignore || { echo '.worktrees/' >> .gitignore; echo 'worktrees/' >> .gitignore; }
    ```
 
 2. **Create worktree**:

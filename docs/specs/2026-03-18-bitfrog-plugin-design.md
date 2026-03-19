@@ -146,7 +146,7 @@ Each sub-skill follows a unified structure: **Philosophy → Workflow → Embedd
 5. Write spec document to `docs/specs/`
 
 **Embedded Tools:**
-- Spec document writing (`docs/specs/YYYY-MM-DD-<topic>-spec.md`)
+- Spec document writing (`docs/specs/YYYY-MM-DD-<topic>-design.md`)
 - Spec-reviewer subagent dispatch loop (max 3 iterations)
 - User review gate before proceeding
 

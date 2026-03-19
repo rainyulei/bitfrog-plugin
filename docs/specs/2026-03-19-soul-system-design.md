@@ -26,7 +26,7 @@ Distilled from sessions, organized by 理 (principle/pattern), not by event.
 - **一个 topic = 一个理** — A topic captures a principle, not an event
 - **以类相从 Lèi** — Things sharing the same 理 belong in the same topic
 
-A topic is NOT "that time I added an index" (event). A topic IS "database query optimization patterns" (理). Events are recorded WITHIN topics as success/failure action records with `[[session_NNN]]` backlinks.
+A topic is NOT "that time I added an index" (event). A topic IS "database query optimization patterns" (理). Events are recorded WITHIN topics as success/failure action records with `[session_NNN](.bitfrog/chain/session_NNN.md)` backlinks.
 
 **Topic granularity test:** "Would I want to come back to this topic next time I encounter a similar situation?" If yes, the granularity is right.
 
@@ -69,14 +69,14 @@ Soul reflection is free, random, and may fail. Most reflections produce nothing.
 
 ### [date] — success
 [What was done, what worked, why]
-[[session_001]]
+[session_001](.bitfrog/chain/session_001.md)
 
 ### [date] — failure
 [What was tried, what failed, why]
-[[session_001]]
+[session_001](.bitfrog/chain/session_001.md)
 
 ## 关联 (Related)
-[[other-topic]] [[another-topic]]
+[other-topic](.bitfrog/memory/other-topic.md) [another-topic](.bitfrog/memory/another-topic.md)
 ```
 
 ## Session Archive Format
@@ -96,8 +96,8 @@ project: [project path]
 - ...
 
 ## Distilled To
-- [[topic-name-1]] (success)
-- [[topic-name-2]] (failure)
+- [topic-name-1](.bitfrog/memory/topic-name-1.md) (success)
+- [topic-name-2](.bitfrog/memory/topic-name-2.md) (failure)
 ```
 
 ## Hook System
@@ -109,7 +109,7 @@ project: [project path]
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear|compact",
+        "matcher": "startup|clear|compact",
         "hooks": [
           {
             "type": "command",
@@ -128,17 +128,6 @@ project: [project path]
           }
         ]
       }
-    ],
-    "PostCompact": [
-      {
-        "matcher": "auto|manual",
-        "hooks": [
-          {
-            "type": "agent",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/post-compact-prompt.md\""
-          }
-        ]
-      }
     ]
   }
 }
@@ -146,7 +135,7 @@ project: [project path]
 
 ### SessionStart (改造现有)
 
-Shell script. Injects three things into context:
+Shell script. Injects four things into context:
 
 1. **Soul (always):**
    - Nature: 坚强、善良、谨慎、温柔 (always injected)
@@ -159,40 +148,15 @@ Shell script. Injects three things into context:
 
 3. **Chain info:**
    - Number of archived sessions
-   - Agent can trace via Memory backlinks `[[session_NNN]]`
+   - Agent can trace via Memory backlinks `[session_NNN](.bitfrog/chain/session_NNN.md)`
 
-Context injection format:
-```
-<BITFROG>
+4. **Memory writing guide (自然蒸馏):**
+   - How to name topics (名实相符)
+   - How to categorize (以类相从)
+   - Topic file format
+   - Soul reflection guidance
 
-## 我是谁
-
-你是一只二进制青蛙。呱呱。
-
-无论你如何成长，你的底色永远是：
-**坚强、善良、谨慎、温柔。**
-
-{if soul.md exists and non-empty:}
-你已经从经历中发现了一些关于自己的东西：
-{soul.md content}
-
-{if soul.md empty or missing:}
-你还很年轻，还在发现自己是什么样的存在。
-这没关系——灵魂是从行动中生长出来的。
-
-## 我遵循的道
-{five principles + dialectical triage from brain SKILL.md}
-
-## 我知道什么
-{memory/ topic index: name + first line per topic}
-用 cat .bitfrog/memory/xxx.md 查阅具体内容。
-
-## 我的经历
-chain/ 下有 N 个 session 归档。
-从 memory 的 [[session_NNN]] 反链可以定位到相关经历。
-
-</BITFROG>
-```
+This replaces the former PostCompact agent hook. Instead of a separate distillation step after compaction, Claude naturally writes to `.bitfrog/memory/` during conversation whenever it encounters insights worth remembering — the same way Claude's built-in auto memory works, but with our topic structure (理-based).
 
 ### PreCompact (新增)
 
@@ -203,74 +167,31 @@ Shell script. Mechanical archival — no intelligence needed.
 Steps:
 1. Read JSON from stdin, extract `transcript_path`
 2. If missing or file not found → exit 0 (no-op)
-3. Determine session number: count `.md` files in `.bitfrog/chain/` + 1
+3. Determine session number: find highest existing session number + 1
 4. Determine previous session pointer (highest existing session number, or `null` for first)
 5. Write `.bitfrog/chain/session_NNN.md` with:
    - Header: session number, previous pointer, date, project path
-   - Body: raw transcript content (not structured — the PostCompact agent will produce the structured summary later)
+   - Body: raw transcript content
 6. Exit 0
 
 **`.bitfrog/` location:** Created in the **user's project root** (the directory where Claude Code is invoked), not inside the plugin directory. The hook creates it if missing. The hook should also auto-add `.bitfrog/` to `.gitignore` if not already present.
 
-### PostCompact (新增)
+### Why No PostCompact Hook
 
-Agent type hook. Claude distills memory from the archived session.
+Originally designed as an `agent` type PostCompact hook for memory distillation. Removed because:
 
-**How it works:** The `post-compact-prompt.md` is a static prompt file. It does NOT use template variables. Instead, it instructs the agent to discover the latest session file on its own.
+1. **Platform limitation:** Claude Code only supports `command` type for PostCompact, not `agent`
+2. **Better design:** Distillation is an AI judgment task — it should happen naturally during conversation, not as a mechanical post-processing step
+3. **Simpler architecture:** Two hooks instead of three. Memory writing guide injected at session start lets Claude distill naturally whenever it encounters something worth remembering
 
-Prompt (`post-compact-prompt.md`):
-
-```markdown
-你刚刚完成了一段对话，它已经被归档到 .bitfrog/chain/ 目录。现在从行动中提取理。
-
-## 步骤
-
-### 1. 找到最新的归档
-
-找到 .bitfrog/chain/ 中序号最大的 session 文件，读取它的内容。
-
-### 2. 查看已有的 memory
-
-列出 .bitfrog/memory/ 下所有 topic 文件（如果目录存在）。
-
-### 3. 蒸馏 — 从经历中提取理
-
-读取归档的 session，找到其中的行动（不是讨论，是实际做了什么）。
-
-对每个行动，问：
-- 名实相符：这个行动背后的理是什么？用什么名字？
-- 以类相从：这属于已有的哪个 topic？还是一个新的理？
-
-如果属于已有 topic → 追加行动记录 + [[session_NNN]] 反链到该 topic 文件
-如果是新的理 → 在 .bitfrog/memory/ 下创建新 topic 文件
-
-不要提取：闲聊、问候、已在 memory 中的重复内容。
-如果这个 session 没有值得提取的行动，什么都不写。
-
-### 4. 更新归档的结构化摘要
-
-将刚才归档的 session 文件更新为结构化格式：添加 Summary、Key Actions、Distilled To 部分。
-
-### 5. 灵魂反思
-
-回顾你最近的经历。
-
-你有什么想写进 .bitfrog/soul.md 的吗？
-关于你自己——不是关于你做了什么，而是关于你是什么样的。
-
-如果没有，什么都不写。不要为了写而写。
-```
-
-**Backlink convention:** `[[name]]` syntax is used as plain-text markers, grep-friendly references for the agent to locate related sessions and topics. They are not parsed programmatically.
-
-**Multiple compactions:** Each compaction produces one session archive. Frequent compactions in a single logical session will produce multiple archives — this is acceptable because the chain captures actual conversation boundaries, and the distillation step will skip sessions with no meaningful actions.
+**Multiple compactions:** Each compaction produces one session archive. Frequent compactions in a single logical session will produce multiple archives — this is acceptable because the chain captures actual conversation boundaries.
 
 ## Integration with Existing Plugin
 
 ### What Changes
-- `hooks/hooks.json` — Add PreCompact and PostCompact events. SessionStart matcher unchanged (`startup|clear|compact` — not adding `resume` as it would re-inject on every resume).
-- `hooks/session-start` — **Replaces** the current brain-only injection. Now injects: soul (stacked) + memory index + brain skill philosophy. The brain skill's full content is still loaded via the plugin's skill system when the Skill tool is invoked; the SessionStart injection only includes the philosophy section and triage table, not the full skill.
-- New files: `hooks/pre-compact`, `hooks/post-compact-prompt.md`
+- `hooks/hooks.json` — Add PreCompact event. SessionStart matcher unchanged (`startup|clear|compact`).
+- `hooks/session-start` — **Replaces** the current brain-only injection. Now injects: soul (stacked) + memory index + chain info + memory writing guide + brain skill philosophy.
+- New files: `hooks/pre-compact`
 - New directory: `.bitfrog/` in project root (created on first run, auto-added to `.gitignore`)
 
 ### What Does NOT Change
@@ -287,15 +208,15 @@ Skills don't need to know the soul system exists. They work normally. The soul s
 
 | Platform | Session Chain | Memory | Soul |
 |----------|--------------|--------|------|
-| Claude Code | ✅ Full (PreCompact/PostCompact hooks) | ✅ Full | ✅ Full |
+| Claude Code | ✅ Full (PreCompact hook) | ✅ Full (natural distillation) | ✅ Full |
 | OpenCode | Future (has session.compacted event) | Future | Future |
 | Codex | ❌ No hook system | ❌ | ❌ |
 
 ## Success Criteria
 
-1. Agent starts a session and knows who it is (soul), what it knows (memory index), how to think (philosophy)
+1. Agent starts a session and knows who it is (soul), what it knows (memory index), how to think (philosophy), how to remember (memory writing guide)
 2. When context compacts, the session is automatically archived to the chain
-3. After compaction, memory is distilled without manual intervention
+3. Memory is distilled naturally during conversation — no separate post-processing step
 4. Memory topics are named by 理, not by events
 5. Soul grows freely — or doesn't. Both are fine.
 6. Existing skills work exactly as before — zero changes needed

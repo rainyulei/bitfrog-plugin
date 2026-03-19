@@ -35,7 +35,7 @@ else
 fi
 
 # Determine session number (highest existing + 1, not count)
-HIGHEST=$(find "$CHAIN_DIR" -name "session_*.md" 2>/dev/null | sed 's/.*session_0*//' | sed 's/\.md//' | sort -n | tail -1)
+HIGHEST=$(find "$CHAIN_DIR" -name "session_*.md" 2>/dev/null | sed -n 's/.*session_\([0-9]*\)\.md/\1/p' | sed 's/^0*//' | sort -n | tail -1)
 SESSION_NUM=$(( ${HIGHEST:-0} + 1 ))
 SESSION_ID=$(printf "session_%03d" "$SESSION_NUM")
 

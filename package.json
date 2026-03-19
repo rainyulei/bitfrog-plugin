@@ -1,12 +1,13 @@
 {
   "name": "bitfrog-plugin",
   "version": "1.0.0",
-  "description": "Chinese philosophy-driven development workflows for Claude Code, Codex, and OpenCode",
+  "description": "Chinese philosophy-driven development workflows — one brain, many paths",
   "author": {
     "name": "rainlei"
   },
   "homepage": "https://github.com/rainyulei/bitfrog-plugin",
   "repository": "https://github.com/rainyulei/bitfrog-plugin",
+  "type": "module",
   "license": "MIT",
   "keywords": ["skills", "chinese-philosophy", "tdd", "debugging", "brainstorm", "bitfrog", "workflows"]
 }

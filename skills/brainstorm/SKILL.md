@@ -90,7 +90,7 @@ The principle: your design should feel like it belongs in this codebase, not lik
 When the design is agreed upon, write the specification to:
 
 ```
-docs/specs/YYYY-MM-DD-<topic>-spec.md
+docs/specs/YYYY-MM-DD-<topic>-design.md
 ```
 
 The spec must include:

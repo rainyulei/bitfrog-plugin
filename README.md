@@ -1,4 +1,4 @@
-# BitFrog Plugin 🐸
+# BitFrog Plugin
 
 > 蛙鸣万物，道法自然
 > One entry, many paths — philosophy guides, tools serve.
@@ -42,18 +42,33 @@ User message
 
 You never need to think about "which skill to use." Just describe your need.
 
+## Soul System
+
+BitFrog has a persistent identity that grows across sessions:
+
+- **Session Chain** — Conversations are archived to `.bitfrog/chain/` on context compaction
+- **Memory** — Insights are naturally distilled into `.bitfrog/memory/`, organized by 理 (principle), not by event
+- **Soul** — Self-awareness emerges in `.bitfrog/soul.md` through experience, not configuration
+
+The soul is stacked: nature (坚强善良谨慎温柔) + philosophical upbringing + self-discovery.
+
+## Prerequisites
+
+- **Python 3** — used by lifecycle hooks for JSON escaping/parsing
+
 ## Installation
 
-### Claude Code
+### Claude Code (Marketplace)
 
 ```bash
-claude plugin add bitfrog-plugin
+/plugin marketplace add rainyulei/bitfrog-plugin
+/plugin install bitfrog-plugin@bitfrog-marketplace
 ```
 
-Or from this repository:
+### Claude Code (Local)
 
 ```bash
-claude plugin add /path/to/bitfrog-plugin
+claude --plugin-dir /path/to/bitfrog-plugin
 ```
 
 ### Codex
@@ -76,13 +91,13 @@ Add to your `opencode.json`:
 
 ## Slash Commands
 
-Optional shortcuts — the brain handles routing automatically, but you can also be explicit:
+Optional shortcuts — the brain handles routing automatically:
 
 | Command | Workflow |
 |---------|----------|
 | `/brainstorm` | Explore ideas — 格物致知 |
 | `/plan` | Create implementation plan — 格物→致知 |
-| `/execute-plan` | Execute with TDD — 知行合一 |
+| `/execute-plan` | Execute plan with TDD — 知行合一 |
 | `/debug` | Diagnose issues — 辩证论治 |
 | `/review` | Three-level reflection — 三省吾身 |
 | `/mentor` | Guided learning — 不愤不启 |
@@ -99,7 +114,7 @@ Maps dependencies, discovers patterns from git history, decomposes into bite-siz
 TDD cycle (RED→GREEN→REFACTOR), parallel subagent dispatch for independent tasks, verification-before-completion.
 
 ### Debug (辩证论治)
-Four Diagnostic Methods from Traditional Chinese Medicine: 望(Observe), 闻(Listen), 问(Inquire), 切(Examine). Classifies issues as surface/internal/deep.
+Four Diagnostic Methods: 望(Observe), 闻(Listen), 问(Inquire), 切(Examine). Classifies issues as surface/internal/deep.
 
 ### Review (三省吾身)
 Three reflections: self (spec compliance), peer (code-reviewer subagent), final (user value). Includes branch completion and cleanup.
@@ -110,8 +125,8 @@ Three reflections: self (spec compliance), peer (code-reviewer subagent), final 
 ## Credits
 
 BitFrog Plugin builds upon:
-- [BitFrog Copilot](https://github.com/rainyulei/bitfrog-copilot) — the original VS Code extension with Chinese philosophy-driven agents
-- [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent — the skill architecture and workflow framework
+- [BitFrog Copilot](https://github.com/rainyulei/bitfrog-copilot) — the original VS Code extension
+- [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent — the skill architecture framework
 
 ## License
 

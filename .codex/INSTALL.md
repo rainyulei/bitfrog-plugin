@@ -5,6 +5,7 @@ Enable BitFrog's philosophy-driven development skills in Codex via native skill 
 ## Prerequisites
 
 - Git
+- Python 3 (used by lifecycle hooks for JSON escaping/parsing)
 
 ## Installation
 
