@@ -8,15 +8,9 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-.}"
 BITFROG_DIR="${PROJECT_ROOT}/.bitfrog"
 
-# --- Escape helper ---
+# --- Escape helper (uses python3 for correct JSON escaping) ---
 escape_for_json() {
-    local s="$1"
-    s="${s//\\/\\\\}"
-    s="${s//\"/\\\"}"
-    s="${s//$'\n'/\\n}"
-    s="${s//$'\r'/\\r}"
-    s="${s//$'\t'/\\t}"
-    printf '%s' "$s"
+    printf '%s' "$1" | python3 -c "import sys,json; sys.stdout.write(json.dumps(sys.stdin.read())[1:-1])"
 }
 
 # --- Read brain skill (strip frontmatter) ---
@@ -26,7 +20,7 @@ if [ ! -f "$BRAIN_PATH" ]; then
   exit 1
 fi
 raw_brain=$(cat "$BRAIN_PATH")
-brain_content=$(echo "$raw_brain" | awk 'BEGIN{fm=0} /^---$/{fm++;next} fm>=2{print}')
+brain_content=$(printf '%s\n' "$raw_brain" | awk 'BEGIN{fm=0} /^---$/{fm++;next} fm>=2{print}')
 [ -z "$brain_content" ] && brain_content="$raw_brain"
 
 # --- Build soul block (stacked: nature + upbringing + self) ---

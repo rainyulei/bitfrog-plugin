@@ -8,8 +8,14 @@ BITFROG_DIR="${PROJECT_ROOT}/.bitfrog"
 CHAIN_DIR="${BITFROG_DIR}/chain"
 
 # Read hook input from stdin
+# Claude Code may nest data under 'input' key or provide at top level
 INPUT=$(cat)
-TRANSCRIPT_PATH=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('input',d).get('transcript_path',''))" 2>/dev/null || echo "")
+TRANSCRIPT_PATH=$(echo "$INPUT" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+i=d.get('input',d)
+print(i.get('transcript_path','') if isinstance(i,dict) else '')
+" 2>/dev/null || echo "")
 
 # If no transcript path or file not found, exit silently
 if [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ]; then
@@ -28,31 +34,25 @@ else
   echo '.bitfrog/' > "${PROJECT_ROOT}/.gitignore"
 fi
 
-# Determine session number
-EXISTING=$(find "$CHAIN_DIR" -name "session_*.md" 2>/dev/null | wc -l | tr -d ' ')
-SESSION_NUM=$((EXISTING + 1))
+# Determine session number (highest existing + 1, not count)
+HIGHEST=$(find "$CHAIN_DIR" -name "session_*.md" 2>/dev/null | sed 's/.*session_0*//' | sed 's/\.md//' | sort -n | tail -1)
+SESSION_NUM=$(( ${HIGHEST:-0} + 1 ))
 SESSION_ID=$(printf "session_%03d" "$SESSION_NUM")
 
-# Determine previous pointer
-if [ "$SESSION_NUM" -gt 1 ]; then
-  PREV_NUM=$((SESSION_NUM - 1))
-  PREV_ID=$(printf "session_%03d" "$PREV_NUM")
+# Previous pointer = highest existing session (not assumed contiguous)
+if [ -n "$HIGHEST" ] && [ "$HIGHEST" -gt 0 ]; then
+  PREV_ID=$(printf "session_%03d" "$HIGHEST")
 else
   PREV_ID="null"
 fi
 
-# Write session archive
+# Write session archive (safe: no heredoc with transcript content)
 DATE=$(date +"%Y-%m-%d %H:%M")
-cat > "${CHAIN_DIR}/${SESSION_ID}.md" << ARCHIVE
-# ${SESSION_ID}
-previous: ${PREV_ID}
-date: ${DATE}
-project: ${PROJECT_ROOT}
+ARCHIVE_PATH="${CHAIN_DIR}/${SESSION_ID}.md"
 
-## Raw Transcript
-
-$(cat "$TRANSCRIPT_PATH")
-ARCHIVE
+printf "# %s\nprevious: %s\ndate: %s\nproject: %s\n\n## Raw Transcript\n\n" \
+  "$SESSION_ID" "$PREV_ID" "$DATE" "$PROJECT_ROOT" > "$ARCHIVE_PATH"
+cat "$TRANSCRIPT_PATH" >> "$ARCHIVE_PATH"
 
 echo '{}'
 exit 0
