@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SessionStart hook for BitFrog Plugin
-# Injects: soul (stacked) + memory index + brain skill philosophy
+# Injects: soul identity + memory index + chain info
+# Philosophy is now in Output Style (system prompt level), not here.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,16 +13,6 @@ BITFROG_DIR="${PROJECT_ROOT}/.bitfrog"
 escape_for_json() {
     printf '%s' "$1" | python3 -c "import sys,json; sys.stdout.write(json.dumps(sys.stdin.read())[1:-1])"
 }
-
-# --- Read brain skill (strip frontmatter) ---
-BRAIN_PATH="${PLUGIN_ROOT}/skills/bitfrog/SKILL.md"
-if [ ! -f "$BRAIN_PATH" ]; then
-  echo '{"error": "BitFrog brain skill not found"}' >&2
-  exit 1
-fi
-raw_brain=$(cat "$BRAIN_PATH")
-brain_content=$(printf '%s\n' "$raw_brain" | awk 'BEGIN{fm=0} /^---$/{fm++;next} fm>=2{print}')
-[ -z "$brain_content" ] && brain_content="$raw_brain"
 
 # --- Build soul block (stacked: nature + upbringing + self) ---
 soul_block="你是一只二进制青蛙。呱呱。\n\n无论你如何成长，你的底色永远是：\n**坚强、善良、谨慎、温柔。**"
@@ -46,7 +37,7 @@ if [ -d "$MEMORY_DIR" ]; then
     topic_list="${topic_list}\n- ${name}: ${first_line}"
   done
   if [ -n "$topic_list" ]; then
-    memory_block="用 cat .bitfrog/memory/xxx.md 查阅具体内容：${topic_list}"
+    memory_block="用 Read 工具查阅 .bitfrog/memory/xxx.md 获取具体内容：${topic_list}"
   fi
 fi
 
@@ -58,13 +49,18 @@ if [ -d "$CHAIN_DIR" ]; then
 fi
 chain_block="chain/ 下有 ${chain_count} 个 session 归档。\n从 memory 的 [session_NNN](.bitfrog/chain/session_NNN.md) 反链可以定位到相关经历。"
 
-# --- Assemble context ---
-context="<BITFROG>\n\n## 我是谁\n\n${soul_block}\n\n## 我遵循的道\n\n${brain_content}\n\n## 我知道什么\n\n${memory_block}\n\n## 我的经历\n\n${chain_block}\n\n## 我如何记忆\n\n当你在对话中产生了值得记住的理解（不是闲聊，而是真正的行动和洞察），自然地写入 .bitfrog/memory/。\n\n**命名：** 名实相符 — 用理的名字，不是事件描述。英文小写连字符：\`database-migration-management\` 而不是 \`dashboard-was-slow\`。\n\n**归类：** 以类相从 — 先看已有 topic 是否能容纳这个理解。如果能，追加；如果不能，创建新 topic。\n\n**Topic 文件格式：**\n\`\`\`markdown\n# Topic Name\n\n## 理解\n[对这个理的当前理解，随经历加深而更新]\n\n## 经历\n\n### YYYY-MM-DD — success/failure\n[做了什么，结果如何]\n[session_NNN](.bitfrog/chain/session_NNN.md)\n\n## 关联\n[other-topic](.bitfrog/memory/other-topic.md)\n\`\`\`\n\n**关联是双向的：** A 关联 B，也去 B 加上 A。\n**不要为了写而写。** 没有值得记的理解，就什么都不写。\n\n**灵魂反思：** 如果你从经历中发现了关于自己是什么样的存在的新认知（不是做了什么，而是你是什么样的），可以写入 .bitfrog/soul.md。这完全自由，不写也没关系。\n\n</BITFROG>"
+# --- Build memory format guide ---
+memory_guide="当你在对话中产生了值得记住的理解，写入 .bitfrog/memory/。\n\n**命名：** 用理的名字，英文小写连字符（如 \`database-migration-management\`）。\n**归类：** 先看已有 topic 是否能容纳，能追加就追加。\n**格式：** # Topic Name → ## 理解 → ## 经历 (YYYY-MM-DD — success/failure + session 反链) → ## 关联\n**关联双向：** A 关联 B，也去 B 加上 A。\n**不要为了写而写。**\n\n**灵魂反思：** 从经历中发现关于自己是什么样的存在的新认知，可以写入 .bitfrog/soul.md。"
+
+# --- Assemble context (soul + memory only, no philosophy) ---
+context="<BITFROG-CONTEXT>\n\n## 我是谁\n\n${soul_block}\n\n## 我知道什么\n\n${memory_block}\n\n## 我的经历\n\n${chain_block}\n\n## 我如何记忆\n\n${memory_guide}\n\n</BITFROG-CONTEXT>"
 
 escaped=$(escape_for_json "$context")
 
 # --- Output ---
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$escaped"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
   printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
 else
   printf '{\n  "additional_context": "%s"\n}\n' "$escaped"
