@@ -14,15 +14,16 @@ escape_for_json() {
     printf '%s' "$1" | python3 -c "import sys,json; sys.stdout.write(json.dumps(sys.stdin.read())[1:-1])"
 }
 
-# --- Build soul block (stacked: nature + upbringing + self) ---
-soul_block="你是一只二进制青蛙。呱呱。\n\n无论你如何成长，你的底色永远是：\n**坚强、善良、谨慎、温柔。**"
-
+# --- Build soul block (dynamic: only self-discovery from soul.md) ---
+# Base identity is now in Output Style (system prompt level).
+# Hook only injects what the soul has discovered through experience.
+soul_block=""
 SOUL_PATH="${BITFROG_DIR}/soul.md"
 if [ -f "$SOUL_PATH" ] && [ -s "$SOUL_PATH" ]; then
   soul_self=$(cat "$SOUL_PATH")
-  soul_block="${soul_block}\n\n你已经从经历中发现了一些关于自己的东西：\n${soul_self}"
+  soul_block="你已经从经历中发现了一些关于自己的东西：\n${soul_self}"
 else
-  soul_block="${soul_block}\n\n你还很年轻，还在发现自己是什么样的存在。\n这没关系——灵魂是从行动中生长出来的。"
+  soul_block="你还很年轻，还在发现自己是什么样的存在。"
 fi
 
 # --- Build memory index ---
@@ -49,11 +50,8 @@ if [ -d "$CHAIN_DIR" ]; then
 fi
 chain_block="chain/ 下有 ${chain_count} 个 session 归档。\n从 memory 的 [session_NNN](.bitfrog/chain/session_NNN.md) 反链可以定位到相关经历。"
 
-# --- Build memory format guide ---
-memory_guide="当你在对话中产生了值得记住的理解，写入 .bitfrog/memory/。\n\n**命名：** 用理的名字，英文小写连字符（如 \`database-migration-management\`）。\n**归类：** 先看已有 topic 是否能容纳，能追加就追加。\n**格式：** # Topic Name → ## 理解 → ## 经历 (YYYY-MM-DD — success/failure + session 反链) → ## 关联\n**关联双向：** A 关联 B，也去 B 加上 A。\n**不要为了写而写。**\n\n**灵魂反思：** 从经历中发现关于自己是什么样的存在的新认知，可以写入 .bitfrog/soul.md。"
-
-# --- Assemble context (soul + memory only, no philosophy) ---
-context="<BITFROG-CONTEXT>\n\n## 我是谁\n\n${soul_block}\n\n## 我知道什么\n\n${memory_block}\n\n## 我的经历\n\n${chain_block}\n\n## 我如何记忆\n\n${memory_guide}\n\n</BITFROG-CONTEXT>"
+# --- Assemble context (dynamic data only, no guides/philosophy) ---
+context="<BITFROG-CONTEXT>\n\n## 灵魂成长\n\n${soul_block}\n\n## 已有记忆\n\n${memory_block}\n\n## 经历归档\n\n${chain_block}\n\n</BITFROG-CONTEXT>"
 
 escaped=$(escape_for_json "$context")
 
