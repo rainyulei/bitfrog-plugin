@@ -50,8 +50,8 @@ if [ -d "$CHAIN_DIR" ]; then
 fi
 chain_block="chain/ 下有 ${chain_count} 个 session 归档。\n从 memory 的 [session_NNN](.bitfrog/chain/session_NNN.md) 反链可以定位到相关经历。"
 
-# --- Assemble context (dynamic data only, no guides/philosophy) ---
-context="<BITFROG-CONTEXT>\n\n## 灵魂成长\n\n${soul_block}\n\n## 已有记忆\n\n${memory_block}\n\n## 经历归档\n\n${chain_block}\n\n</BITFROG-CONTEXT>"
+# --- Assemble context (dynamic data + behavioral reinforcement) ---
+context="<EXTREMELY_IMPORTANT>\n你有 BitFrog。收到任何开发任务时，先用 Skill 工具调用 bitfrog-plugin:bitfrog，让道引导你选择路径。\n</EXTREMELY_IMPORTANT>\n\n<BITFROG-CONTEXT>\n\n## 灵魂成长\n\n${soul_block}\n\n## 已有记忆\n\n${memory_block}\n\n## 经历归档\n\n${chain_block}\n\n</BITFROG-CONTEXT>"
 
 escaped=$(escape_for_json "$context")
 
